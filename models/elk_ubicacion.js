@@ -1,29 +1,32 @@
-
 module.exports = (sequelize, DataTypes) => {
-    const usuarios_pedidos = sequelize.define('usuarios_pedidos', {
-        id_usuario_pedido: {
+    const elk_ubicacion = sequelize.define('elk_ubicacion', {
+        id_elk_ubicacion: {
             type: DataTypes.INTEGER(10),
             primaryKey: true,
             autoIncrement: true,
             allowNull: false,
         },
-        id_usuario: {
-            type: DataTypes.INTEGER(10),
+        nombre_elk: {
+            type: DataTypes.STRING(120),
+            allowNull: false,
+        },
+        ubicacion_elk: {
+            type: DataTypes.STRING(255),
             allowNull: true,
+        },
+        usuario_insercion: {
+            type: DataTypes.INTEGER(10),
+            allowNull: false,
             references: {
                 model: 'usuarios',
                 key: 'id_usuario'
             }
         },
-        descripcion_pedido: {
-            type: DataTypes.STRING(255),
-            allowNull: false,
-        },
-        fecha_pedido: {
+        fecha_insercion: {
             type: DataTypes.DATE,
             allowNull: false,
         },
-        id_usuario_asignado: {
+        usuario_actualizacion: {
             type: DataTypes.INTEGER(10),
             allowNull: true,
             references: {
@@ -31,9 +34,9 @@ module.exports = (sequelize, DataTypes) => {
                 key: 'id_usuario'
             }
         },
-        estado_pedido: {
-            type: DataTypes.STRING(50),
-            allowNull: false,
+        fecha_actualizacion: {
+            type: DataTypes.DATE,
+            allowNull: true,
         },
         estado: {
             type: DataTypes.STRING(20),
@@ -44,5 +47,5 @@ module.exports = (sequelize, DataTypes) => {
         timestamps: false,
         freezeTableName: true,
     });
-    return usuarios_pedidos;
+    return elk_ubicacion;
 };

@@ -17,4 +17,7 @@ router.post('/createUserClient', usuariosController.createUserClient);
 // Ruta para obtener todos los usuarios con el rol de admin
 router.get('/getAllAdmins', usuariosController.getAllAdmins);
 
+// Ruta para buscar usuarios
+router.get('/searchUser', usuariosController.searchUser);
+
 module.exports = router;

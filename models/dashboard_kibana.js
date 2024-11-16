@@ -28,7 +28,8 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: 'A'
         }
     },{
-        timestamps: false
+        timestamps: false,
+        freezeTableName: true,
     });
     return dashboard_kibana;
 };

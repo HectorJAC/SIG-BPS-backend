@@ -77,7 +77,7 @@ exports.getAllUsers = async (req, res) => {
     }
 };
 
-// Funcion para buscar un usuario mediante si id_empresa
+// Funcion para buscar un usuario mediante su id_empresa
 exports.getUserByCompany = async (req, res) => {
     const page = parseInt(req.query.page) || 1; // Página actual, por defecto 1
     const limit = parseInt(req.query.limit) || 5; // Cantidad de resultados por página
@@ -191,6 +191,65 @@ exports.getAllAdmins = async (req, res) => {
             return res.status(200).send(admin);
         } else {
             return res.status(404).send({ message: 'No se encontraron administradores' });
+        }
+    } catch (error) {
+        return res.status(500).send({ message: 'Error en el servidor', error: error });
+    }
+};
+
+// Funcion para buscar un usuario por su username, cedula o por su nombre y apellido
+exports.searchUser = async (req, res) => {
+    const page = parseInt(req.query.page) || 1; // Página actual, por defecto 1
+    const limit = parseInt(req.query.limit) || 5; // Cantidad de resultados por página
+
+    const { search, estado } = req.query;
+    try {
+        // Consulta para obtener la cantidad total de usuarios
+        const totalUsers = await usuarios.sequelize.models.usuarios.count({
+            where: {
+                estado: estado
+            }
+        });
+
+        const totalPages = Math.ceil(totalUsers / limit); // Calcular el total de páginas
+        const offset = (page - 1) * limit; // Calcular el desplazamiento
+
+        const allUsers = await usuarios.sequelize.query(`
+            SELECT
+                u.*, 
+                r.tipo_rol as rol,
+                e.nombre_empresa as nombre_empresa
+            FROM
+                usuarios u
+            INNER JOIN
+                roles r
+            ON
+                u.id_rol = r.id_rol
+            INNER JOIN
+                empresas e
+            ON
+                u.id_empresa = e.id_empresa
+            WHERE
+                u.id_rol = 2 AND
+                u.estado = '${estado}' AND
+                (u.id_usuario LIKE '%${search}%' OR
+                u.cedula LIKE '%${search}%' OR
+                u.username LIKE '%${search}%' OR
+                CONCAT(u.nombres, ' ', u.apellidos) LIKE '%${search}%')
+            LIMIT 
+                ${limit} OFFSET ${offset}`, 
+            { type: usuarios.sequelize.QueryTypes.SELECT } 
+        );
+        if (allUsers.length === 0) {
+            return res.status(404).send({ message: 'No se encontraron usuarios' });
+        } else {
+            return res.status(200).json({
+                totalUsers: totalUsers,
+                totalPages: totalPages,
+                currentPage: page,
+                pageSize: limit,
+                usuarios: allUsers,
+            });
         }
     } catch (error) {
         return res.status(500).send({ message: 'Error en el servidor', error: error });

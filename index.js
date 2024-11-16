@@ -37,6 +37,14 @@ app.use('/pedidos', pedidosRoutes);
 const dashboardKibanaRoutes = require('./routers/dashboardKibana.routes');
 app.use('/dashboard_kibana', dashboardKibanaRoutes);
 
+// Conexion DB
+const conexionDbRoutes = require('./routers/conexionDb.routes');
+app.use('/conexion_db', conexionDbRoutes);
+
+// Ubicacion Elk
+const ubicacionElkRoutes = require('./routers/ubicacionElk.routes');
+app.use('/ubicacion_elk', ubicacionElkRoutes);
+
 db.sequelize.sync().then(() => {
   app.listen(port, () => {
     console.log(`Server is running on port ${port}`);

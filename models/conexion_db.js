@@ -1,38 +1,37 @@
-
 module.exports = (sequelize, DataTypes) => {
-    const usuarios_pedidos = sequelize.define('usuarios_pedidos', {
-        id_usuario_pedido: {
+    const conexion_db = sequelize.define('conexion_db', {
+        id_conexion_db: {
             type: DataTypes.INTEGER(10),
             primaryKey: true,
             autoIncrement: true,
             allowNull: false,
         },
-        id_usuario: {
+        id_empresa: {
             type: DataTypes.INTEGER(10),
             allowNull: true,
             references: {
-                model: 'usuarios',
-                key: 'id_usuario'
+                model: 'empresas',
+                key: 'id_empresa'
             }
         },
-        descripcion_pedido: {
+        conexion_driver_library: {
             type: DataTypes.STRING(255),
             allowNull: false,
         },
-        fecha_pedido: {
-            type: DataTypes.DATE,
+        conexion_driver_class: {
+            type: DataTypes.STRING(255),
             allowNull: false,
         },
-        id_usuario_asignado: {
-            type: DataTypes.INTEGER(10),
-            allowNull: true,
-            references: {
-                model: 'usuarios',
-                key: 'id_usuario'
-            }
+        conexion_string: {
+            type: DataTypes.STRING(255),
+            allowNull: false,
         },
-        estado_pedido: {
-            type: DataTypes.STRING(50),
+        conexion_user: {
+            type: DataTypes.STRING(255),
+            allowNull: false,
+        },
+        conexion_password: {
+            type: DataTypes.STRING(255),
             allowNull: false,
         },
         estado: {
@@ -44,5 +43,5 @@ module.exports = (sequelize, DataTypes) => {
         timestamps: false,
         freezeTableName: true,
     });
-    return usuarios_pedidos;
+    return conexion_db;
 };
