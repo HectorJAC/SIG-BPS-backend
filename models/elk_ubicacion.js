@@ -23,7 +23,7 @@ module.exports = (sequelize, DataTypes) => {
             }
         },
         fecha_insercion: {
-            type: DataTypes.DATE,
+            type: DataTypes.DATEONLY,
             allowNull: false,
         },
         usuario_actualizacion: {
@@ -35,13 +35,14 @@ module.exports = (sequelize, DataTypes) => {
             }
         },
         fecha_actualizacion: {
-            type: DataTypes.DATE,
+            type: DataTypes.DATEONLY,
             allowNull: true,
         },
         estado: {
             type: DataTypes.STRING(20),
             allowNull: false,
-            defaultValue: 'A'
+            defaultValue: 'A',
+            comment: 'Estado defecto A'
         }
     },{
         timestamps: false,

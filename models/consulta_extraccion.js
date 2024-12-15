@@ -1,25 +1,57 @@
 module.exports = (sequelize, DataTypes) => {
-    const dashboard_kibana = sequelize.define('dashboard_kibana', {
-        id_dashboard_kibana: {
+    const consulta_extraccion = sequelize.define('consulta_extraccion', {
+        id_consulta_extraccion: {
             type: DataTypes.INTEGER(10),
             primaryKey: true,
             autoIncrement: true,
             allowNull: false,
         },
-        nombre_dashboard: {
-            type: DataTypes.STRING(120),
+        id_conexion_db: {
+            type: DataTypes.INTEGER(10),
+            allowNull: false,
+            references: {
+                model: 'conexion_db',
+                key: 'id_conexion_db'
+            }
+        },
+        consulta_data: {
+            type: DataTypes.TEXT('long'),
+            allowNull: false,
+            comment: 'Consulta SQL'
+        },
+        transformacion_data: {
+            type: DataTypes.TEXT('long'),
             allowNull: false,
         },
-        dashboard_source: {
+        index_data: {
+            type: DataTypes.STRING(255),
+            allowNull: false,
+            comment: 'Nombre id extraccion'
+        },
+        data_stream: {
             type: DataTypes.STRING(255),
             allowNull: false,
         },
-        id_empresa: {
+        use_columns_value: {
+            type: DataTypes.STRING(20),
+            allowNull: false,
+        },
+        tracking_columns: {
+            type: DataTypes.STRING(120),
+            allowNull: false,
+            comment: 'Primary key de la tabla'
+        },
+        type: {
+            type: DataTypes.STRING(120),
+            allowNull: false,
+            comment: 'Nombre de la tabla'
+        },
+        id_conexion_elastic: {
             type: DataTypes.INTEGER(10),
             allowNull: true,
             references: {
-                model: 'empresas',
-                key: 'id_empresa'
+                model: 'conexion_elastic',
+                key: 'id_conexion_elastic'
             }
         },
         usuario_insercion: {
@@ -56,5 +88,5 @@ module.exports = (sequelize, DataTypes) => {
         timestamps: false,
         freezeTableName: true,
     });
-    return dashboard_kibana;
+    return consulta_extraccion;
 };

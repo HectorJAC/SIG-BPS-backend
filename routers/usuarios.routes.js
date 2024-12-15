@@ -20,4 +20,22 @@ router.get('/getAllAdmins', usuariosController.getAllAdmins);
 // Ruta para buscar usuarios
 router.get('/searchUser', usuariosController.searchUser);
 
+// Ruta para obtener todos los usuarios con el rol de admin paginados
+router.get('/getAllAdminsPagination', usuariosController.getAllAdminsPagination);
+
+// Ruta para buscar administradores
+router.get('/searchAdmin', usuariosController.searchAdmin);
+
+// Ruta para actualizar un usuario
+router.put('/updateUser', usuariosController.updateUser);
+
+// Ruta para cambiar la contraseña de un usuario
+router.put('/changePassword', usuariosController.changePassword);
+
+// Ruta para crear un usuario administrador
+router.post('/createUserAdmin', usuariosController.createUserAdmin);
+
+// Ruta para eliminar un usuario
+router.put('/deleteUser', usuariosController.deleteUser);
+
 module.exports = router;

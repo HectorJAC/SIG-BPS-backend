@@ -9,7 +9,7 @@ exports.login = async (req, res) => {
         const usuario = await usuarios.sequelize.models.usuarios.findOne({
             where: {
                 username: username,
-                password: password
+                password: password,
             }
         });
 
@@ -19,7 +19,14 @@ exports.login = async (req, res) => {
                 id: usuario.id_usuario
             }, 'secretkey');
 
-            if (usuario.id_rol === 2) {
+            if (usuario.estado === 'I') {
+                return res.status(200).send({ 
+                    message: 'Usuario eliminado. Registre uno nuevo o contacte con el administrador', 
+                    usuario: usuario 
+                });
+            }
+
+            if (usuario.id_rol === 2 && usuario.estado === 'A') {
                 const empresa = await empresas.sequelize.models.empresas.findOne({
                     where: {
                         id_empresa: usuario.id_empresa
@@ -32,7 +39,7 @@ exports.login = async (req, res) => {
                     usuario: usuario,
                     empresa: empresa
                 });
-            } else {
+            } else if (usuario.id_rol === 1 && usuario.estado === 'A') {
                 return res.status(200).send({ 
                     message: 'Inicio de sesión exitoso',
                     accessToken: accessToken,

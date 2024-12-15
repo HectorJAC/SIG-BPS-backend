@@ -20,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
         },
         fecha_pedido: {
-            type: DataTypes.DATE,
+            type: DataTypes.DATEONLY,
             allowNull: false,
         },
         id_usuario_asignado: {
@@ -31,6 +31,10 @@ module.exports = (sequelize, DataTypes) => {
                 key: 'id_usuario'
             }
         },
+        fecha_actualizacion: {
+            type: DataTypes.DATEONLY,
+            allowNull: true,
+        },
         estado_pedido: {
             type: DataTypes.STRING(50),
             allowNull: false,
@@ -38,7 +42,8 @@ module.exports = (sequelize, DataTypes) => {
         estado: {
             type: DataTypes.STRING(20),
             allowNull: false,
-            defaultValue: 'A'
+            defaultValue: 'A',
+            comment: 'Estado defecto A'
         }
     },{
         timestamps: false,

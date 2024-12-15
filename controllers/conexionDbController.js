@@ -29,7 +29,7 @@ exports.getAllConexionDb = async (req, res) => {
             WHERE
                 cdb.estado = 'A'
             ORDER BY
-                cdb.id_conexion_db
+                cdb.id_conexion_db DESC
             LIMIT
                 ${limit} OFFSET ${offset}`,
             { type: conexion_db.sequelize.QueryTypes.SELECT }
@@ -144,3 +144,32 @@ exports.updateConexionDb = async (req, res) => {
         return res.status(500).send({ message: 'Error en el servidor', error: error});
     }
 };
+
+// Funcion para obtener todas las conexiones de base de datos sin paginacion
+exports.getConexionDBData = async (req, res) => {
+    try {
+        const allConexions = await conexion_db.sequelize.query(`
+            SELECT
+                cdb.*,
+                e.nombre_empresa
+            FROM
+                conexion_db cdb
+            JOIN
+                empresas e 
+            ON 
+                cdb.id_empresa = e.id_empresa
+            WHERE
+                cdb.estado = 'A'
+            ORDER BY
+                cdb.id_conexion_db DESC`,
+            { type: conexion_db.sequelize.QueryTypes.SELECT }
+        );
+        if (allConexions.length === 0) {
+            return res.status(404).send({ message: 'No se encontraron conexiones de base de datos registradas' });
+        } else {
+            return res.status(200).json(allConexions);
+        }
+    } catch (error) {
+        return res.status(500).send({ message: 'Error en el servidor', error: error});
+    }
+}

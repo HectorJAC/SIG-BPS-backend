@@ -14,4 +14,7 @@ router.post('/createConexionDb', conexionDbController.createConexionDb);
 // Ruta para actualizar los datos de una conexion de base de datos
 router.put('/updateConexionDb', conexionDbController.updateConexionDb);
 
+// Ruta para obtener las conexiones de base de datos sin paginacion
+router.get('/getConexionDBData', conexionDbController.getConexionDBData);
+
 module.exports = router;

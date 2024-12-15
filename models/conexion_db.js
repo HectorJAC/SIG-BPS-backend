@@ -14,6 +14,10 @@ module.exports = (sequelize, DataTypes) => {
                 key: 'id_empresa'
             }
         },
+        nombre_conexion_db: {
+            type: DataTypes.STRING(120),
+            allowNull: false,
+        },
         conexion_driver_library: {
             type: DataTypes.STRING(255),
             allowNull: false,
@@ -34,10 +38,35 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING(255),
             allowNull: false,
         },
+        usuario_insercion: {
+            type: DataTypes.INTEGER(10),
+            allowNull: false,
+            references: {
+                model: 'usuarios',
+                key: 'id_usuario'
+            }
+        },
+        fecha_insercion: {
+            type: DataTypes.DATEONLY,
+            allowNull: false,
+        },
+        usuario_actualizacion: {
+            type: DataTypes.INTEGER(10),
+            allowNull: true,
+            references: {
+                model: 'usuarios',
+                key: 'id_usuario'
+            }
+        },
+        fecha_actualizacion: {
+            type: DataTypes.DATEONLY,
+            allowNull: true,
+        },
         estado: {
             type: DataTypes.STRING(20),
             allowNull: false,
-            defaultValue: 'A'
+            defaultValue: 'A',
+            comment: 'Estado defecto A'
         }
     },{
         timestamps: false,
