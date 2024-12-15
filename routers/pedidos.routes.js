@@ -23,4 +23,7 @@ router.get('/getAllPedidosByUser', pedidosController.getAllPedidosByUser);
 // Ruta para inactivar un pedido
 router.put('/deletePedido', pedidosController.deletePedido);
 
+// Ruta para actualizar el usuario asignado a un pedido
+router.put('/updatePedidoUser', pedidosController.updatePedidoUser);
+
 module.exports = router;

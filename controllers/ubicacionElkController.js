@@ -24,7 +24,7 @@ exports.findAllElkUbication = async (req, res) => {
             LEFT JOIN
                 usuarios u_actualizacion ON eu.usuario_actualizacion = u_actualizacion.id_usuario
             ORDER BY
-                eu.id_elk_ubicacion
+                eu.id_elk_ubicacion DESC
             LIMIT
                 ${limit} OFFSET ${offset}`,
             { type: elk_ubicacion.sequelize.QueryTypes.SELECT }

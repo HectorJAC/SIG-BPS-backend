@@ -29,13 +29,16 @@ exports.getAllPedidos = async (req, res) => {
                 up.*,
                 u.nombres AS nombres_usuario,
                 u.apellidos AS apellidos_usuario,
-                e.nombre_empresa AS nombre_empresa  
+                e.nombre_empresa AS nombre_empresa,
+                COALESCE(u_actualizacion.username, '') AS usuario_asignado
             FROM
                 usuarios_pedidos up
             INNER JOIN
                 usuarios u ON up.id_usuario = u.id_usuario
             INNER JOIN
                 empresas e ON u.id_empresa = e.id_empresa
+            LEFT JOIN
+                usuarios u_actualizacion ON up.id_usuario_asignado = u_actualizacion.id_usuario
             WHERE
                 up.estado = 'A'`,
             { type: usuarios_pedidos.sequelize.QueryTypes.SELECT }
@@ -89,10 +92,11 @@ exports.getPedidosByStatus = async (req, res) => {
 
 // Funcion para actualizar el estado de un pedido
 exports.updatePedidoStatus = async (req, res) => {
-    const { id_usuario_pedido, estado_pedido } = req.body;
+    const { id_usuario_pedido, estado_pedido, fecha_actualizacion } = req.body;
     try {
         const pedidoEstadoNuevo = await usuarios_pedidos.sequelize.models.usuarios_pedidos.update({
-            estado_pedido: estado_pedido
+            estado_pedido: estado_pedido,
+            fecha_actualizacion: fecha_actualizacion
         }, {
             where: {
                 id_usuario_pedido: id_usuario_pedido
@@ -142,7 +146,7 @@ exports.getAllPedidosByUser = async (req, res) => {
                 up.estado = 'A' AND
                 up.id_usuario = ${id_usuario}
             ORDER BY
-                up.id_usuario_pedido
+                up.id_usuario_pedido DESC
             LIMIT
                 ${limit} OFFSET ${offset}`,
             { type: usuarios_pedidos.sequelize.QueryTypes.SELECT }
@@ -178,6 +182,28 @@ exports.deletePedido = async (req, res) => {
             return res.status(200).send({ message: 'Pedido eliminado correctamente', pedido: pedidoEliminado});
         } else {
             return res.status(404).send({ message: 'Error eliminando el pedido'});
+        }
+    } catch (error) {
+        return res.status(500).send({ message: 'Error en el servidor', error: error });
+    }
+};
+
+// Funcion para actualizar el usuario_actualziacion de un pedido
+exports.updatePedidoUser = async (req, res) => {
+    const { id_usuario_pedido, id_usuario_asignado, fecha_actualizacion } = req.body;
+    try {
+        const pedidoActualizado = await usuarios_pedidos.sequelize.models.usuarios_pedidos.update({
+            id_usuario_asignado: id_usuario_asignado,
+            fecha_actualizacion: fecha_actualizacion
+        }, {
+            where: {
+                id_usuario_pedido: id_usuario_pedido
+            }
+        });
+        if (pedidoActualizado > 0) {
+            return res.status(200).send({ message: 'Usuario Asignado actualizado correctamente', pedido: pedidoActualizado});
+        } else {
+            return res.status(404).send({ message: 'Error asignando el usuario'});
         }
     } catch (error) {
         return res.status(500).send({ message: 'Error en el servidor', error: error });

@@ -1,4 +1,5 @@
 const empresas = require('../models');
+const usuarios = require('../models');
 
 // Funcion para buscar todas las empresas
 exports.findAllCompany = async (req, res) => {
@@ -19,13 +20,19 @@ exports.findAllCompany = async (req, res) => {
 
         const Allcompanies = await empresas.sequelize.query(`
             SELECT
-                *
+                e.*,
+                u_insercion.username AS usuario_insercion,
+                COALESCE(u_actualizacion.username, '') AS usuario_actualizacion
             FROM
-                empresas
+                empresas e
+            LEFT JOIN
+                usuarios u_insercion ON e.usuario_insercion = u_insercion.id_usuario
+            LEFT JOIN
+                usuarios u_actualizacion ON e.usuario_actualizacion = u_actualizacion.id_usuario
             WHERE
-                estado = '${estado}'
+                e.estado = '${estado}'
             ORDER BY
-                id_empresa
+                e.id_empresa DESC
             LIMIT
                 ${limit} OFFSET ${offset}`,
             { type: empresas.sequelize.QueryTypes.SELECT }
@@ -86,11 +93,21 @@ exports.getCompanyById = async (req, res) => {
 
 // Funcion para crear una nueva empresa
 exports.createCompany = async (req, res) => {
-    const { nombre_empresa } = req.body;
+    const { 
+        nombre_empresa,
+        rnc_empresa,
+        telefono_empresa,
+        usuario_insercion,
+        fecha_insercion
+    } = req.body;
 
     try {
         const newCompany = await empresas.sequelize.models.empresas.create({
             nombre_empresa: nombre_empresa,
+            rnc_empresa: rnc_empresa,
+            telefono_empresa: telefono_empresa,
+            usuario_insercion: usuario_insercion,
+            fecha_insercion: fecha_insercion,
             estado: 'A'
         });
         if (newCompany) {
@@ -105,11 +122,22 @@ exports.createCompany = async (req, res) => {
 
 // Funcion para actualizar los datos de una empresa
 exports.updateCompany = async (req, res) => {
-    const { id_empresa, nombre_empresa } = req.body;
+    const { 
+        id_empresa, 
+        nombre_empresa,
+        rnc_empresa,
+        telefono_empresa,
+        usuario_actualizacion,
+        fecha_actualizacion
+    } = req.body;
 
     try {
         const company = await empresas.sequelize.models.empresas.update({
-            nombre_empresa: nombre_empresa
+            nombre_empresa: nombre_empresa,
+            rnc_empresa: rnc_empresa,
+            telefono_empresa: telefono_empresa,
+            usuario_actualizacion: usuario_actualizacion,
+            fecha_actualizacion: fecha_actualizacion
         }, {
             where: {
                 id_empresa: id_empresa
@@ -127,10 +155,30 @@ exports.updateCompany = async (req, res) => {
 
 // Funcion para cambiar de estado una empresa 
 exports.changeStateCompany = async (req, res) => {
-    const { id_empresa, estado } = req.body;
+    const { 
+        id_empresa,
+        usuario_actualizacion,
+        fecha_actualizacion, 
+        estado 
+    } = req.body;
 
     try {
+        // Verificar si hay usuarios asociados a la empresa
+        const usuariosAsociados = await usuarios.sequelize.models.usuarios.findAll({
+            where: {
+                id_empresa: id_empresa
+            }
+        });
+
+        if (usuariosAsociados.length > 0 && estado === 'I') {
+            return res.status(400).send({ 
+                message: 'No se puede inactivar la empresa porque tiene usuarios asociados.' 
+            });
+        }
+
         const company = await empresas.sequelize.models.empresas.update({
+            usuario_actualizacion: usuario_actualizacion,
+            fecha_actualizacion: fecha_actualizacion,
             estado: estado
         }, {
             where: {

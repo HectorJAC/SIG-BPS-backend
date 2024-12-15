@@ -17,10 +17,7 @@ module.exports = (sequelize, DataTypes) => {
         id_rol: {
             type: DataTypes.INTEGER(10),
             allowNull: false,
-            references: {
-                model: 'roles',
-                key: 'id_rol'
-            }
+            comment: '1 = admin, 2 = gerente'
         },
         nombres: {
             type: DataTypes.STRING(120),
@@ -31,15 +28,15 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
         },
         cedula: {
-            type: DataTypes.INTEGER(10),
+            type: DataTypes.BIGINT(19),
             allowNull: false,
         },
         email: {
-            type: DataTypes.BIGINT(120),
+            type: DataTypes.STRING(19),
             allowNull: false,
         },
         numero_telefono: {
-            type: DataTypes.INTEGER(10),
+            type: DataTypes.BIGINT(19),
             allowNull: true,
         },
         id_empresa: {
@@ -50,10 +47,19 @@ module.exports = (sequelize, DataTypes) => {
                 key: 'id_empresa'
             }
         },
+        fecha_insercion: {
+            type: DataTypes.DATEONLY,
+            allowNull: false,
+        },
+        fecha_actualizacion: {
+            type: DataTypes.DATEONLY,
+            allowNull: true,
+        },
         estado: {
             type: DataTypes.STRING(20),
             allowNull: false,
-            defaultValue: 'A'
+            defaultValue: 'A',
+            comment: 'Estado defecto A'
         },
     },{
         tableName: 'usuarios',

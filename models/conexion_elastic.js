@@ -1,26 +1,15 @@
 module.exports = (sequelize, DataTypes) => {
-    const dashboard_kibana = sequelize.define('dashboard_kibana', {
-        id_dashboard_kibana: {
+    const conexion_elastic = sequelize.define('conexion_elastic', {
+        id_conexion_elastic: {
             type: DataTypes.INTEGER(10),
             primaryKey: true,
             autoIncrement: true,
             allowNull: false,
         },
-        nombre_dashboard: {
-            type: DataTypes.STRING(120),
-            allowNull: false,
-        },
-        dashboard_source: {
+        hosts_elastic: {
             type: DataTypes.STRING(255),
             allowNull: false,
-        },
-        id_empresa: {
-            type: DataTypes.INTEGER(10),
-            allowNull: true,
-            references: {
-                model: 'empresas',
-                key: 'id_empresa'
-            }
+            comment: 'IP DE ElasticSearch'
         },
         usuario_insercion: {
             type: DataTypes.INTEGER(10),
@@ -56,5 +45,5 @@ module.exports = (sequelize, DataTypes) => {
         timestamps: false,
         freezeTableName: true,
     });
-    return dashboard_kibana;
+    return conexion_elastic;
 };
