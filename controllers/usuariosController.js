@@ -247,7 +247,7 @@ exports.getAllAdmins = async (req, res) => {
     }
 };
 
-// Funcion para buscar un usuario por su username, cedula o por su nombre y apellido
+// Funcion para buscar un usuario por su username, cedula o por su nombre y apellido o por el nombre de su empresa
 exports.searchUser = async (req, res) => {
     const page = parseInt(req.query.page) || 1; // Página actual, por defecto 1
     const limit = parseInt(req.query.limit) || 5; // Cantidad de resultados por página
@@ -280,7 +280,8 @@ exports.searchUser = async (req, res) => {
                 (u.id_usuario LIKE '%${search}%' OR
                 u.cedula LIKE '%${search}%' OR
                 u.username LIKE '%${search}%' OR
-                CONCAT(u.nombres, ' ', u.apellidos) LIKE '%${search}%')
+                CONCAT(u.nombres, ' ', u.apellidos) LIKE '%${search}%') OR
+                e.nombre_empresa LIKE '%${search}%'
             LIMIT 
                 ${limit} OFFSET ${offset}`, 
             { type: usuarios.sequelize.QueryTypes.SELECT } 

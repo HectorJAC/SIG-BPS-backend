@@ -17,7 +17,9 @@ exports.getDashboardKibanaByUser = async (req, res) => {
             ON 
                 ud.id_dashboard_kibana = dk.id_dashboard_kibana
             WHERE
-                ud.id_usuario = ${id_usuario}`,
+                ud.id_usuario = ${id_usuario}
+                AND
+                ud.estado = 'A'`,
             { type: usuarios_dashboard.sequelize.QueryTypes.SELECT }
             );
         if (dashboardsUsuario.length === 0) {
@@ -51,7 +53,8 @@ exports.getAllDashboards = async (req, res) => {
                 dk.*,
                 e.nombre_empresa as nombre_empresa,
                 u_insercion.username AS usuario_insercion,
-                COALESCE(u_actualizacion.username, '') AS usuario_actualizacion
+                COALESCE(u_actualizacion.username, '') AS usuario_actualizacion,
+                count(ud.id_usuario) as cantidad_usuarios
             FROM
                 dashboard_kibana dk
             INNER JOIN
@@ -62,8 +65,12 @@ exports.getAllDashboards = async (req, res) => {
                 usuarios u_insercion ON dk.usuario_insercion = u_insercion.id_usuario
             LEFT JOIN
                 usuarios u_actualizacion ON dk.usuario_actualizacion = u_actualizacion.id_usuario
+            LEFT JOIN
+                usuarios_dashboard ud ON dk.id_dashboard_kibana = ud.id_dashboard_kibana
             WHERE
                 dk.estado = 'A'
+            GROUP BY
+                dk.id_dashboard_kibana
             ORDER BY
                 dk.id_dashboard_kibana DESC
             LIMIT
@@ -331,6 +338,35 @@ exports.addUserDashboard = async (req, res) => {
             estado: 'A'
         });
         return res.status(201).send({ message: 'Dashboard agregado al usuario', dashboard: newDashboard });
+    } catch (error) {
+        return res.status(500).send({ message: 'Error en el servidor', error: error });
+    }
+};
+
+// Funcion para obtener todos los usuarios que tienen un dashboard asignado
+exports.getAllUsersWithDashboard = async (req, res) => {
+    const { id_dashboard_kibana } = req.query;
+    try {
+        const usuarios = await usuarios_dashboard.sequelize.query(`
+            SELECT
+                u.*,
+                ud.id_usuario_dashboard,
+                ud.estado AS estado_usuario_dashboard
+            FROM
+                usuarios u
+            JOIN
+                usuarios_dashboard ud
+            ON
+                u.id_usuario = ud.id_usuario
+            WHERE
+                ud.id_dashboard_kibana = ${id_dashboard_kibana}`,
+            { type: usuarios_dashboard.sequelize.QueryTypes.SELECT }
+        );
+        if (usuarios.length === 0) {
+            return res.status(404).send({ message: 'No se encontraron usuarios con el dashboard asignado' });
+        } else {
+            return res.status(200).send(usuarios);
+        }
     } catch (error) {
         return res.status(500).send({ message: 'Error en el servidor', error: error });
     }

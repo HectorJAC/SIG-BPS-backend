@@ -29,4 +29,7 @@ router.put('/inactivateUserDashboard', dashboardKibanaController.inactivateUserD
 // Ruta para agregar un dashboard a un usuario
 router.post('/addUserDashboard', dashboardKibanaController.addUserDashboard);
 
+// Ruta para obtener todos los usuarios que tiene un dashboard asignado
+router.get('/getAllUsersWithDashboard', dashboardKibanaController.getAllUsersWithDashboard);
+
 module.exports = router;
