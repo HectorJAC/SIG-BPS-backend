@@ -45,9 +45,13 @@ app.use('/ubicacion_elk', ubicacionElkRoutes);
 const conexionElasticRoutes = require('./routers/conexionElastic.routes');
 app.use('/conexion_elastic', conexionElasticRoutes);
 
-// Consulta Extracciom
+// Consulta Extraccion
 const consultaExtraccionRoutes = require('./routers/consultaExtraccion.routes');
 app.use('/consulta_extraccion', consultaExtraccionRoutes);
+
+// Consulta Dashboard
+const consultaDashboardRoutes = require('./routers/consultaDashboard.routes');
+app.use('/consulta_dashboard', consultaDashboardRoutes);
 
 db.sequelize.sync().then(() => {
   app.listen(port, () => {

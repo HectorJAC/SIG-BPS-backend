@@ -139,14 +139,14 @@ exports.searchDashboard = async (req, res) => {
             LEFT JOIN
                 usuarios u_actualizacion ON dk.usuario_actualizacion = u_actualizacion.id_usuario
             WHERE
-                dk.id_dashboard_kibana LIKE '%${search}%' OR
+                (dk.id_dashboard_kibana LIKE '%${search}%' OR
                 dk.nombre_dashboard LIKE '%${search}%' OR
                 e.id_empresa LIKE '%${search}%' OR
                 e.nombre_empresa LIKE '%${search}%' OR
                 u.id_usuario LIKE '%${search}%' OR
                 u.username LIKE '%${search}%' OR
                 u.nombres LIKE '%${search}%' OR
-                u.apellidos LIKE '%${search}%' AND
+                u.apellidos LIKE '%${search}%') AND
                 dk.estado = '${estado}'
             ORDER BY
                 dk.id_dashboard_kibana DESC
@@ -366,6 +366,85 @@ exports.getAllUsersWithDashboard = async (req, res) => {
             return res.status(404).send({ message: 'No se encontraron usuarios con el dashboard asignado' });
         } else {
             return res.status(200).send(usuarios);
+        }
+    } catch (error) {
+        return res.status(500).send({ message: 'Error en el servidor', error: error });
+    }
+};
+
+// Funcion paar buscar un dashboard perteneciente a un usuario
+exports.searchDashboardUser = async (req, res) => {
+    const page = parseInt(req.query.page) || 1; // Página actual, por defecto 1
+    const limit = parseInt(req.query.limit) || 5; // Cantidad de resultados por página
+
+    const { search, estado, id_usuario } = req.query;
+    try {
+        // Consulta para obtener la cantidad total de roles
+        const totalDashboards = await usuarios_dashboard.sequelize.models.usuarios_dashboard.count({
+            where: {
+                estado: estado,
+                id_usuario: id_usuario
+            }
+        });
+
+        const totalPages = Math.ceil(totalDashboards / limit); // Calcular el total de páginas
+        const offset = (page - 1) * limit; // Calcular el desplazamiento
+        
+        const allDashboards = await dashboard_kibana.sequelize.query(`
+            SELECT
+                dk.id_dashboard_kibana AS id_dashboard_kibana,
+                dk.nombre_dashboard AS nombre_dashboard,
+                dk.dashboard_source AS dashboard_source,
+                dk.estado AS estado,
+                dk.fecha_insercion AS fecha_insercion,
+                COALESCE(dk.fecha_actualizacion, '') AS fecha_actualizacion,
+                e.id_empresa AS id_empresa,
+                e.nombre_empresa AS nombre_empresa,
+                COALESCE(u.id_usuario, '') AS id_usuario,
+                COALESCE(u.username, '') AS username,
+                COALESCE(u.nombres, '') AS nombres_usuario,
+                COALESCE(u.apellidos, '') AS apellidos_usuario,
+                u_insercion.username AS usuario_insercion,
+                COALESCE(u_actualizacion.username, '') AS usuario_actualizacion
+            FROM
+                dashboard_kibana dk
+            LEFT JOIN
+                empresas e ON dk.id_empresa = e.id_empresa
+            LEFT JOIN
+                usuarios_dashboard ud ON dk.id_dashboard_kibana = ud.id_dashboard_kibana
+            LEFT JOIN
+                usuarios u ON ud.id_usuario = u.id_usuario
+            LEFT JOIN
+                usuarios u_insercion ON dk.usuario_insercion = u_insercion.id_usuario
+            LEFT JOIN
+                usuarios u_actualizacion ON dk.usuario_actualizacion = u_actualizacion.id_usuario
+            WHERE
+                (dk.id_dashboard_kibana LIKE '%${search}%' OR
+                dk.nombre_dashboard LIKE '%${search}%' OR
+                e.id_empresa LIKE '%${search}%' OR
+                e.nombre_empresa LIKE '%${search}%' OR
+                u.id_usuario LIKE '%${search}%' OR
+                u.username LIKE '%${search}%' OR
+                u.nombres LIKE '%${search}%' OR
+                u.apellidos LIKE '%${search}%') AND
+                ud.id_usuario = ${id_usuario} AND
+                ud.estado = '${estado}'
+            ORDER BY
+                dk.id_dashboard_kibana DESC
+            LIMIT
+                ${limit} OFFSET ${offset}`, 
+            { type: dashboard_kibana.sequelize.QueryTypes.SELECT } 
+        );
+        if (allDashboards.length === 0) {
+            return res.status(404).send({ message: 'No se encontraron dashboards' });
+        } else {
+            return res.status(200).json({
+                totalDashboards: totalDashboards,
+                totalPages: totalPages,
+                currentPage: page,
+                pageSize: limit,
+                dashboardsUsuario: allDashboards
+            });
         }
     } catch (error) {
         return res.status(500).send({ message: 'Error en el servidor', error: error });

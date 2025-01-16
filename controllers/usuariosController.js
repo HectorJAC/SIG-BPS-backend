@@ -1,4 +1,5 @@
 const usuarios = require('../models');
+const bcrypt = require('bcrypt');
 
 // Funcion para obtener los datos de un solo usuario
 exports.getUser = async (req, res) => {
@@ -166,9 +167,11 @@ exports.createUserClient = async (req, res) => {
         return res.status(400).send({ message: 'Debe llenar los campos obligatorios' });
     } else {
         try {
+            const passwordHash = await bcrypt.hash(password, 10);
+
             const user = await usuarios.sequelize.models.usuarios.create({
                 username: username,
-                password: password,
+                password: passwordHash,
                 nombres: nombres,
                 apellidos: apellidos,
                 cedula: cedula,
@@ -181,7 +184,10 @@ exports.createUserClient = async (req, res) => {
             });
             return res.status(201).send({ message: 'Usuario creado correctamente', user: user });
         } catch (error) {
-            return res.status(500).send({ message: 'Error en el servidor', error: error });
+            return res.status(500).send({ 
+                message: error.name === 'SequelizeUniqueConstraintError' ? 'El nombre de usuario o cedula ya existe' : 'Error en el servidor',
+                error: error 
+            });
         }
     }
 };
@@ -209,9 +215,11 @@ exports.createUserAdmin = async (req, res) => {
         return res.status(400).send({ message: 'Debe llenar los campos obligatorios' });
     } else {
         try {
+            const passwordHash = await bcrypt.hash(password, 10);
+
             const user = await usuarios.sequelize.models.usuarios.create({
                 username: username,
-                password: password,
+                password: passwordHash,
                 nombres: nombres,
                 apellidos: apellidos,
                 cedula: cedula,
@@ -223,17 +231,23 @@ exports.createUserAdmin = async (req, res) => {
             });
             return res.status(201).send({ message: 'Usuario creado correctamente', user: user });
         } catch (error) {
-            return res.status(500).send({ message: 'Error en el servidor', error: error });
+            // return res.status(500).send({ message: 'Error en el servidor', error: error });
+            return res.status(500).send({ 
+                message: error.name === 'SequelizeUniqueConstraintError' ? 'El nombre de usuario o cedula ya existe' : 'Error en el servidor',
+                error: error 
+            });
         }
     }
 };
 
 // Funcion para obtener todos los usuarios con el rol de admin sin paginacion
 exports.getAllAdmins = async (req, res) => {
+    const { estado } = req.query;
     try {
         const admin = await usuarios.sequelize.models.usuarios.findAll({
             where: { 
-                id_rol: 1
+                id_rol: 1,
+                estado: estado
             }
         });
 
@@ -275,13 +289,13 @@ exports.searchUser = async (req, res) => {
             ON
                 u.id_empresa = e.id_empresa
             WHERE
-                u.id_rol = 2 AND
-                u.estado = '${estado}' AND
                 (u.id_usuario LIKE '%${search}%' OR
                 u.cedula LIKE '%${search}%' OR
                 u.username LIKE '%${search}%' OR
-                CONCAT(u.nombres, ' ', u.apellidos) LIKE '%${search}%') OR
-                e.nombre_empresa LIKE '%${search}%'
+                CONCAT(u.nombres, ' ', u.apellidos) LIKE '%${search}%' OR
+                e.nombre_empresa LIKE '%${search}%') AND
+                u.id_rol = 2 AND
+                u.estado = '${estado}'
             LIMIT 
                 ${limit} OFFSET ${offset}`, 
             { type: usuarios.sequelize.QueryTypes.SELECT } 
@@ -443,19 +457,23 @@ exports.updateUser = async (req, res) => {
 // Funcion para cambiar la contraseña de un usuario
 exports.changePassword = async (req, res) => {
     const { id_usuario, new_password } = req.body;
+
     if (!new_password) {
         console.log(new_password);
         return res.status(400).send({ message: 'Debe llenar los campos obligatorios' });
     } else {
         try {
-            const user = await usuarios.sequelize.models.usuarios.update({
-                password: new_password
-            }, {
-                where: { id_usuario: id_usuario }
-            });
+            // Generar un hash para la nueva contraseña
+            const hashedPassword = await bcrypt.hash(new_password, 10);
 
-            if (user.length > 0) {
-                return res.status(200).send({ message: 'Contraseña actualizada correctamente', user: user });
+            // Actualizar la contraseña en la base de datos
+            const user = await usuarios.sequelize.models.usuarios.update(
+                { password: hashedPassword },
+                { where: { id_usuario: id_usuario } }
+            );
+
+            if (user[0] > 0) {
+                return res.status(200).send({ message: 'Contraseña actualizada correctamente' });
             } else {
                 return res.status(404).send({ message: 'No se pudo actualizar la contraseña' });
             }

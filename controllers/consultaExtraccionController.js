@@ -184,9 +184,75 @@ exports.updateConsultaExtraction = async (req, res) => {
             }
         });
         if (consultaExtraccion == 0) {
+            console.log(consultaExtraccion);
             return res.status(404).send({ message: 'No se pudo actualizar la consulta de extracción' });
         } else {
             return res.status(200).send({ message: 'Consulta de extracción actualizada correctamente' });
+        }
+    } catch (error) {
+        return res.status(500).send({ message: 'Error en el servidor', error: error});
+    }
+};
+
+// Funcion para buscar una consulta extraccion
+exports.searchConsultaExtraccion = async (req, res) => {
+    const page = parseInt(req.query.page) || 1; // Página actual, por defecto 1
+    const limit = parseInt(req.query.limit) || 5; // Cantidad de resultados por página
+
+    const { search, estado } = req.query;
+
+    try {
+        // Consulta para obtener la cantidad total de conexiones
+        const totalConsultas = await consulta_extraccion.sequelize.models.consulta_extraccion.count({
+            where: {
+                estado: `${estado}`
+            }
+        });
+
+        const totalPages = Math.ceil(totalConsultas / limit); // Calcular el total de páginas
+        const offset = (page - 1) * limit; // Calcular el desplazamiento
+
+        const allConsultaExtraccion = await consulta_extraccion.sequelize.query(`
+            SELECT
+                cet.*,
+                cdb.id_conexion_db,
+                e.nombre_empresa,
+                ce.hosts_elastic,
+                u_insercion.username AS usuario_insercion,
+                COALESCE(u_actualizacion.username, '') AS usuario_actualizacion
+            FROM
+                consulta_extraccion cet
+            JOIN
+                conexion_db cdb ON cet.id_conexion_db = cdb.id_conexion_db
+            JOIN
+                empresas e ON cdb.id_empresa = e.id_empresa
+            JOIN
+                conexion_elastic ce ON cet.id_conexion_elastic = ce.id_conexion_elastic
+            LEFT JOIN
+                usuarios u_insercion ON cet.usuario_insercion = u_insercion.id_usuario
+            LEFT JOIN
+                usuarios u_actualizacion ON cet.usuario_actualizacion = u_actualizacion.id_usuario
+            WHERE
+                (cet.type LIKE '%${search}%' OR
+                cet.index_data LIKE '%${search}%' OR
+                e.nombre_empresa LIKE '%${search}%') AND
+                cet.estado = '${estado}'
+            ORDER BY
+                cet.id_consulta_extraccion DESC
+            LIMIT
+                ${limit} OFFSET ${offset}`,
+            { type: consulta_extraccion.sequelize.QueryTypes.SELECT }
+        );
+        if (allConsultaExtraccion.length === 0) {
+            return res.status(404).send({ message: 'No se encontraron consultas de extraccion registradas' });
+        } else {
+            return res.status(200).json({
+                totalConsultas: totalConsultas,
+                totalPages: totalPages,
+                currentPage: page,
+                pageSize: limit,
+                consultas: allConsultaExtraccion,
+            });
         }
     } catch (error) {
         return res.status(500).send({ message: 'Error en el servidor', error: error});

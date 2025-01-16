@@ -42,7 +42,7 @@ exports.getAllPedidos = async (req, res) => {
             WHERE
                 up.estado = 'A'`,
             { type: usuarios_pedidos.sequelize.QueryTypes.SELECT }
-            );
+        );
         return res.status(200).send(pedidos);
     } catch (error) {
         return res.status(500).send({ message: 'Error en el servidor', error: error });
@@ -116,14 +116,14 @@ exports.updatePedidoStatus = async (req, res) => {
 exports.getAllPedidosByUser = async (req, res) => {
     const page = parseInt(req.query.page) || 1; // Página actual, por defecto 1
     const limit = parseInt(req.query.limit) || 5; // Cantidad de resultados por página
-    const { id_usuario } = req.query;
+    const { id_usuario, estado } = req.query;
 
     try {
         // Consulta para obtener la cantidad total de pedidos por usuario
         const totalPedidosUser = await usuarios_pedidos.sequelize.models.usuarios_pedidos.count({
             where: {
-                estado: 'A',
-                id_usuario: id_usuario
+                id_usuario: id_usuario,
+                estado: estado
             }
         });
 
@@ -143,8 +143,8 @@ exports.getAllPedidosByUser = async (req, res) => {
             INNER JOIN
                 empresas e ON u.id_empresa = e.id_empresa
             WHERE
-                up.estado = 'A' AND
-                up.id_usuario = ${id_usuario}
+                up.id_usuario = ${id_usuario} AND
+                up.estado = '${estado}'
             ORDER BY
                 up.id_usuario_pedido DESC
             LIMIT
@@ -208,4 +208,74 @@ exports.updatePedidoUser = async (req, res) => {
     } catch (error) {
         return res.status(500).send({ message: 'Error en el servidor', error: error });
     }
+};
+
+// Funcion para buscar un pedido
+exports.searchPedido = async (req, res) => {
+    const { search, estado } = req.query;
+
+    try {
+        const pedidos = await usuarios_pedidos.sequelize.query(`
+            SELECT 
+                up.*,
+                u.nombres AS nombres_usuario,
+                u.apellidos AS apellidos_usuario,
+                e.nombre_empresa AS nombre_empresa,
+                COALESCE(u_actualizacion.username, '') AS usuario_asignado
+            FROM
+                usuarios_pedidos up
+            INNER JOIN
+                usuarios u ON up.id_usuario = u.id_usuario
+            INNER JOIN
+                empresas e ON u.id_empresa = e.id_empresa
+            LEFT JOIN
+                usuarios u_actualizacion ON up.id_usuario_asignado = u_actualizacion.id_usuario
+            WHERE
+                (u.nombres LIKE '%${search}%' OR
+                e.nombre_empresa LIKE '%${search}%' OR
+                up.descripcion_pedido LIKE '%${search}%') AND
+                up.estado = '${estado}'`,
+            { type: usuarios_pedidos.sequelize.QueryTypes.SELECT }
+        );
+        if (pedidos.length === 0) {
+            return res.status(404).send({ message: 'No se encontraron pedidos' });
+        } else {
+            return res.status(200).send(pedidos);
+        }
+    } catch (error) {
+        return res.status(500).send({ message: 'Error en el servidor', error: error});
+    };
+};
+
+// Funcion para obtener los datos de un pedido mediante su id
+exports.getRequestById = async (req, res) => {
+    const { id_usuario_pedido } = req.query;
+    try {
+        const pedido = await usuarios_pedidos.sequelize.query(`
+            SELECT 
+                up.*,
+                u.nombres AS nombres_usuario,
+                u.apellidos AS apellidos_usuario,
+                e.nombre_empresa AS nombre_empresa,
+                COALESCE(u_actualizacion.username, '') AS usuario_asignado
+            FROM
+                usuarios_pedidos up
+            INNER JOIN
+                usuarios u ON up.id_usuario = u.id_usuario
+            INNER JOIN
+                empresas e ON u.id_empresa = e.id_empresa
+            LEFT JOIN
+                usuarios u_actualizacion ON up.id_usuario_asignado = u_actualizacion.id_usuario
+            WHERE
+                up.id_usuario_pedido = ${id_usuario_pedido}`,
+            { type: usuarios_pedidos.sequelize.QueryTypes.SELECT }
+        );
+        if (pedido.length === 0) {
+            return res.status(404).send({ message: 'No se encontró el pedido' });
+        } else {
+            return res.status(200).send(pedido[0]);
+        }
+    } catch (error) {
+        return res.status(500).send({ message: 'Error en el servidor', error: error});
+    };
 };

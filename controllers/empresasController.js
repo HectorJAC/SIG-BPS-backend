@@ -218,8 +218,8 @@ exports.searchCompany = async (req, res) => {
             FROM
                 empresas e
             WHERE
-                e.id_empresa LIKE '%${search}%' OR
-                e.nombre_empresa LIKE '%${search}%' AND
+                (e.id_empresa LIKE '%${search}%' OR
+                e.nombre_empresa LIKE '%${search}%') AND
                 e.estado = '${estado}'
             LIMIT 
                 ${limit} OFFSET ${offset}`, 

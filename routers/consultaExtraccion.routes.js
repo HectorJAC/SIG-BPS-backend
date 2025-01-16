@@ -14,6 +14,9 @@ router.post('/createConsultaExtraction', consultaExtraccionController.createCons
 // Ruta para actualizar una consulta de extraccion
 router.put('/updateConsultaExtraction', consultaExtraccionController.updateConsultaExtraction);
 
+// Ruta para buscar una consulta extraccion
+router.get('/searchConsultaExtraccion', consultaExtraccionController.searchConsultaExtraccion);
+
 // Ruta para generar el archivo de configuracion de Logstash
 router.post('/generateLogstashConfig', consultaExtraccionController.generateLogstashConfig);
 

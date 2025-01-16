@@ -32,4 +32,7 @@ router.post('/addUserDashboard', dashboardKibanaController.addUserDashboard);
 // Ruta para obtener todos los usuarios que tiene un dashboard asignado
 router.get('/getAllUsersWithDashboard', dashboardKibanaController.getAllUsersWithDashboard);
 
+// Ruta para buscar un dashboard perteneciente a un usuario
+router.get('/searchDashboardUser', dashboardKibanaController.searchDashboardUser);
+
 module.exports = router;

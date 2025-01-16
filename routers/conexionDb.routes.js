@@ -17,4 +17,7 @@ router.put('/updateConexionDb', conexionDbController.updateConexionDb);
 // Ruta para obtener las conexiones de base de datos sin paginacion
 router.get('/getConexionDBData', conexionDbController.getConexionDBData);
 
+// Ruta para buscar una conexion_db
+router.get('/searchConexionDb', conexionDbController.searchConexionDb);
+
 module.exports = router;
