@@ -351,13 +351,18 @@ exports.getAllUsersWithDashboard = async (req, res) => {
             SELECT
                 u.*,
                 ud.id_usuario_dashboard,
-                ud.estado AS estado_usuario_dashboard
+                ud.estado AS estado_usuario_dashboard,
+                e.nombre_empresa 
             FROM
                 usuarios u
             JOIN
                 usuarios_dashboard ud
             ON
                 u.id_usuario = ud.id_usuario
+            JOIN
+                empresas e
+            ON
+                e.id_empresa = u.id_empresa
             WHERE
                 ud.id_dashboard_kibana = ${id_dashboard_kibana}`,
             { type: usuarios_dashboard.sequelize.QueryTypes.SELECT }
