@@ -25,10 +25,6 @@ app.use('/usuarios', usuariosRoutes);
 const empresasRoutes = require('./routers/empresas.routes');
 app.use('/empresas', empresasRoutes);
 
-// Roles
-const rolesRoutes = require('./routers/roles.routes');
-app.use('/roles', rolesRoutes);
-
 // Pedidos
 const pedidosRoutes = require('./routers/pedidos.routes');
 app.use('/pedidos', pedidosRoutes);
@@ -44,6 +40,18 @@ app.use('/conexion_db', conexionDbRoutes);
 // Ubicacion Elk
 const ubicacionElkRoutes = require('./routers/ubicacionElk.routes');
 app.use('/ubicacion_elk', ubicacionElkRoutes);
+
+// Conexion Elastic
+const conexionElasticRoutes = require('./routers/conexionElastic.routes');
+app.use('/conexion_elastic', conexionElasticRoutes);
+
+// Consulta Extraccion
+const consultaExtraccionRoutes = require('./routers/consultaExtraccion.routes');
+app.use('/consulta_extraccion', consultaExtraccionRoutes);
+
+// Consulta Dashboard
+const consultaDashboardRoutes = require('./routers/consultaDashboard.routes');
+app.use('/consulta_dashboard', consultaDashboardRoutes);
 
 db.sequelize.sync().then(() => {
   app.listen(port, () => {

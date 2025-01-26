@@ -1,25 +1,25 @@
 module.exports = (sequelize, DataTypes) => {
-    const dashboard_kibana = sequelize.define('dashboard_kibana', {
-        id_dashboard_kibana: {
+    const consulta_dashboard = sequelize.define('consulta_dashboard', {
+        id_consulta_dashboard: {
             type: DataTypes.INTEGER(10),
             primaryKey: true,
             autoIncrement: true,
             allowNull: false,
         },
-        nombre_dashboard: {
-            type: DataTypes.STRING(120),
-            allowNull: false,
-        },
-        dashboard_source: {
-            type: DataTypes.STRING(255),
-            allowNull: false,
-        },
-        id_empresa: {
+        id_consulta_extraccion: {
             type: DataTypes.INTEGER(10),
             allowNull: true,
             references: {
-                model: 'empresas',
-                key: 'id_empresa'
+                model: 'consulta_extraccion',
+                key: 'id_consulta_extraccion'
+            }
+        },
+        id_dashboard_kibana: {
+            type: DataTypes.INTEGER(10),
+            allowNull: true,
+            references: {
+                model: 'dashboard_kibana',
+                key: 'id_dashboard_kibana'
             }
         },
         usuario_insercion: {
@@ -56,5 +56,5 @@ module.exports = (sequelize, DataTypes) => {
         timestamps: false,
         freezeTableName: true,
     });
-    return dashboard_kibana;
+    return consulta_dashboard;
 };
